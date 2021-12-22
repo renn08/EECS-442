@@ -70,20 +70,61 @@ def quantize(v, palette):
     Given a scalar v and array of values palette,
     return the index of the closest value
     """
-    return 0
+    v_copy = v.copy()
+    v_copy = v_copy[np.newaxis,:]
+    palette_copy = palette
+    palette_copy = palette_copy[np.newaxis,:]
+    return np.argmin(np.abs(palette_copy - v_copy.T), axis=1) # because the resulting tuple is (-1, 1)
 
 
 def quantizeNaive(IF, palette):
     """Given a floating-point image return quantized version (Naive)"""
     # quantizing multiple
-    return None
+    if IF.ndim == 2:
+        row, col = np.shape(IF)
+        Out = np.ones((row, col), dtype = int)
+    if IF.ndim == 3:
+        row, col, hei = np.shape(IF)
+        Out = np.ones((row, col, hei), dtype = int)
+    for i in range(row):
+        for j in range(col):
+            Out[i][j] = quantize(IF[i][j], palette)
+    return Out
 
 
 def quantizeFloyd(IF, palette):
     """
     Given a floating-point image return quantized version (Floyd-Steinberg)
     """
-    return None
+    if IF.ndim == 3:
+        row, col, hei= np.shape(IF)
+        output = np.ones((row, col, hei), dtype=int)
+    if IF.ndim == 2:
+        row, col = np.shape(IF)
+        output = np.ones((row, col), dtype=int)
+    pixel = IF.copy()
+    for i in range(row):
+        for j in range(col):
+            oldValue = pixel[i][j]
+            colorIndex = quantize(oldValue, palette)
+            output[i][j] = colorIndex
+            if IF.ndim == 2:
+                newValue = palette[colorIndex]
+            if IF.ndim == 3:
+                newValue = np.ones(3)
+                newValue[0] = palette[colorIndex[0]]
+                newValue[1] = palette[colorIndex[1]]
+                newValue[2] = palette[colorIndex[2]]
+            error = oldValue - newValue
+            if i < row - 1:
+                pixel[i + 1][j] += error * 7 / 16
+            if i > 0 and j < col - 1:
+                pixel[i - 1][j + 1] += error * 3 / 16
+            if j < col - 1:
+                pixel[i][j + 1] += error * 5 / 16
+            if i < row - 1 and j < col - 1:
+                pixel[i + 1][j + 1] += error * 1 / 16
+    return output
 
 
 def quantizeFloydGamma(IF, palette):
