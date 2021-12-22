@@ -14,7 +14,7 @@ def t1(L):
 
     Hint: vstack/hstack/dstack, no for loop
     """
-    return None
+    return np.vstack(L)
 
 
 def t2(X):
@@ -34,13 +34,15 @@ def t2(X):
     2) np.argmin
     3) Watch rows and columns!
     """
-    return None
+    w, v = np.linalg.eig(X)
+    smallest = np.argmin(w)
+    return v[:,smallest]
 
 
 def t3(X):
     """
     Inputs:
-    - A: A numpy array of any shape
+    - X: A numpy array of any shape
 
     Returns:
     A copy of X, but with all negative entires set to 0
@@ -54,7 +56,9 @@ def t3(X):
     2) X[S] = v assigns the value v to all entires of X corresponding to
        true values of S.
     """
-    return None
+    S = (X < 0)
+    X[S] = 0
+    return X
 
 
 def t4(R, X):
@@ -74,7 +78,7 @@ def t4(R, X):
        by the matrix R.
     2) .T gives the transpose of a matrix
     """
-    return None
+    return np.dot(R, X.T).T
 
 
 def t5(X):
@@ -94,7 +98,8 @@ def t5(X):
        from rows y0 to (but not including!) y1
        from columns x0 (but not including!) x1
     """
-    return None
+    row, colomn = np.shape(X)
+    return X[0:4, 0:4] - X[row - 4 : row, colomn - 4 : colomn] # return X[0:4, 0:4] - X[-4:, -4:]
 
 
 def t6(N):
@@ -109,7 +114,12 @@ def t6(N):
     Par: 6 lines
     Instructor: 3 lines
     """
-    return None
+    arr = np.ones((N, N))
+    arr[0:5, :] = 0
+    arr[N - 5: N, :] = 0
+    arr[:, 0:5] = 0
+    arr[:, N - 5 : N] = 0
+    return arr
 
 
 def t7(X):
@@ -133,7 +143,8 @@ def t7(X):
     4) Elementwise operations between an array of shape (N, M) and an array of
        shape (N,) won't work -- try reshaping
     """
-    return None
+    return X / np.sqrt(np.sum(X * X, axis=1, keepdims=True))
+
 
 
 def t8(X):
@@ -148,7 +159,7 @@ def t8(X):
     Par: 3 lines
     Instructor: 1 line
     """
-    return None
+    return (X - np.mean(X, axis=1, keepdims=True)) / np.std(X, axis=1, keepdims=True) # / np.std(A)
 
 
 def t9(q, k, v):
@@ -170,7 +181,7 @@ def t9(q, k, v):
     2) Recall that np.sum has useful "axis" and "keepdims" options
     3) np.exp and friends apply elementwise to arrays
     """
-    return None
+    return np.sum(np.exp(-np.sum((q - k) * (q - k), axis=1, keepdims=True)) * v)
 
 
 def t10(Xs):
@@ -193,7 +204,15 @@ def t10(Xs):
     4) Our 3-line solution uses no loops, and uses the algebraic trick from the
        next problem.
     """
-    return None
+    L = len(Xs)
+    centroid = []
+    result = np.zeros((L, L))
+    for k in range(L):
+        centroid.append(np.mean(Xs[k], axis=0, keepdims=True))
+    for i in range(L):
+        for j in range(L):
+            result[i][j] = np.sqrt(np.sum((centroid[i] - centroid[j]) * (centroid[i] - centroid[j])))
+    return result
 
 
 def t11(X):
@@ -218,7 +237,14 @@ def t11(X):
        causing the square root to crash. Just take max(0, value) before the
        square root. Seems to occur on Macs.
     """
-    return None
+    N, M = np.shape(X)
+    A = np.sum(X * X, axis=1, keepdims=True) # ---
+    B = A.T # |
+    b = A + B - 2 * np.dot(X, X.T)
+    b_b = b >= 0
+    b_b_b = b_b * b
+    result = np.sqrt(b_b_b)
+    return result
 
 
 def t12(X, Y):
@@ -237,7 +263,14 @@ def t12(X, Y):
 
     Hints: Similar to previous problem
     """
-    return None
+    N, F = np.shape(X)
+    M, F = np.shape(Y)
+    A = np.sum(X * X, axis=1, keepdims=True)
+    B = np.sum(Y * Y, axis=1, keepdims=True)
+    b = A + B.T - 2 * np.dot(X, Y.T)
+    b_b = b >= 0
+    b_b_b = b_b * b
+    return np.sqrt(b_b_b)
 
 
 def t13(q, V):
@@ -254,7 +287,7 @@ def t13(q, V):
 
     Hint: np.argmax
     """
-    return None
+    return np.argmax(np.dot(q, V.T))
 
 
 def t14(X, y):
@@ -271,7 +304,7 @@ def t14(X, y):
 
     Hint: np.linalg.lstsq, or use the pseudoinverse (X^T X)^-1 X^T y
     """
-    return None
+    return np.linalg.lstsq(X, y)[0]
 
 
 def t15(X, Y):
@@ -289,7 +322,7 @@ def t15(X, Y):
 
     Hint: np.cross
     """
-    return None
+    return np.cross(X, Y)
 
 
 def t16(X):
@@ -309,7 +342,7 @@ def t16(X):
     1) If it doesn't broadcast, reshape or np.expand_dims
     2) X[:, -1] gives the last column of X
     """
-    return None
+    return X[:, 0:-1] / X[:, -1].reshape((-1, 1)) # Notice X[:, -1] is a 1D array
 
 
 def t17(X):
@@ -327,7 +360,7 @@ def t17(X):
 
     Hint: np.hstack, np.ones
     """
-    return None
+    return np.hstack((X, np.ones((len(X[:, 1]), 1))))
 
 
 def t18(N, r, x, y):
@@ -350,7 +383,12 @@ def t18(N, r, x, y):
     1) np.meshgrid and np.arange give you X, Y
     2) Arrays have an astype method
     """
-    return None
+    a = np.ones((N, N))
+    S = np.arange(N).reshape(1, -1) # Notice arange returns a 1D array
+    A = a * S
+    B = a * (S.T)
+    b = np.sqrt((A - x) * (A - x) + (B - y) * (B - y)) < r
+    return b.astype(float)
 
 
 def t19(N, s, x, y):
@@ -370,7 +408,11 @@ def t19(N, s, x, y):
 
     Hint: Be careful with types -- float and int aren't the same!
     """
-    return None
+    S = np.arange(N).reshape(1, N)
+    A = S * np.ones((N, N))
+    B = S.T * np.ones((N, N))
+    b = np.exp(-((A - x) * (A - x) + (B - y) * (B - y)) / (s * s))
+    return b.astype(float)
 
 
 def t20(N, v):
@@ -392,4 +434,9 @@ def t20(N, v):
        (The sign of the numerator tells which side the point is on)
     2) np.abs
     """
-    return None
+    a, b, c = v
+    one = np.ones((N, N))
+    S = np.arange(N).reshape(1, N)
+    A = S * one
+    B = A.T
+    return abs(a * B + b * A + c) / np.sqrt(a * a + b * b)
