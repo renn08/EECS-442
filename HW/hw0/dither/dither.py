@@ -62,6 +62,8 @@ def upscaleNN(I, target_size):
 
 def resizeToSquare(I, maxDim):
     """Given an image, make sure it's no bigger than maxDim on either side"""
+    dim = (maxDim, maxDim)
+    I = cv2.resize(I, dim, interpolation = cv2.INTER_AREA)
     return I
 
 
@@ -71,10 +73,14 @@ def quantize(v, palette):
     return the index of the closest value
     """
     v_copy = v.copy()
-    v_copy = v_copy[np.newaxis,:]
-    palette_copy = palette
-    palette_copy = palette_copy[np.newaxis,:]
-    return np.argmin(np.abs(palette_copy - v_copy.T), axis=1) # because the resulting tuple is (-1, 1)
+    palette_copy = palette.copy()
+    if v.ndim == 1:
+        v_copy = v_copy[np.newaxis,:]
+        palette_copy = palette_copy[np.newaxis,:]
+        return np.argmin(np.abs(palette_copy - v_copy.T), axis=1) # because the resulting tuple is (-1, 1)
+    else:
+        return np.argmin(np.abs(palette_copy - v_copy))
+
 
 
 def quantizeNaive(IF, palette):
@@ -96,6 +102,9 @@ def quantizeFloyd(IF, palette):
     """
     Given a floating-point image return quantized version (Floyd-Steinberg)
     """
+    # print("original:")
+    # print(np.mean(IF))
+
     if IF.ndim == 3:
         row, col, hei= np.shape(IF)
         output = np.ones((row, col, hei), dtype=int)
@@ -198,6 +207,9 @@ if __name__ == "__main__":
         # Call the algorithm and reconstruct the image using the palette
         IQ = algo_fn(I, palette)
         R = reconstructImage(IQ, palette)
+
+        # print("reconstructed: ")
+        # print(np.mean(R))
 
         # Store the height before we upsample
         # Sometimes it's hard to see the pixels and high-dpi screens screw up
